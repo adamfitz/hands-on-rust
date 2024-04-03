@@ -4,7 +4,7 @@ struct State {}
 
 // implement the GameState trait (from bracket-lib) on the State struct created above
 // this is similar to implementing functions for the struct
-impl Gamestate for State {
+impl GameState for State {
     // GameState requires implementation of the tick function with this signature
     // &mut self allows tick function to access State instance and modify it
     // ctx provides a window to the currently running bracket-terminal to get input information from the player and for
@@ -24,7 +24,7 @@ fn main() -> BError {
         // set the window title
         .with_title("Flappy Dragon")
         // trigger the object build/creation
-        .build()?
+        .build()?;
     
     // start executing the game loop and link the engine with the State struct
     main_loop(context, State{})
