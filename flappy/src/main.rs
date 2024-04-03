@@ -20,7 +20,7 @@ impl GameState for State {
 
 fn main() -> BError {
     // request an 80x50 pixel terminal
-    let context = BTermBuilder::simple80x50()
+    let context = BTermBuilder::simple100x80()
         // set the window title
         .with_title("Flappy Dragon")
         // trigger the object build/creation
