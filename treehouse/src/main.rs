@@ -2,9 +2,9 @@ use std::io::stdin;
 
 fn main() {
     let mut visitor_list = vec![
-            Visitor::new("bert", "Hello Bert, enjoy your treehouse."),
-            Visitor::new("steve", "Hi Steve. Your milk is in the fridge."),
-            Visitor::new("fred", "Wow, who invited Fred?"),
+            Visitor::new("bert", VisitorAction::Accept, 45),
+            Visitor::new("steve", VisitorAction::AcceptWithNote{ note: String::from("Lactose-free milk is in the fridge")}, 15),
+            Visitor::new("fred", VisitorAction::Refuse, 30),
         ];
     
     loop {
@@ -27,7 +27,7 @@ fn main() {
                     break;
                 } else {
                     println!("{} is not on the visitor list.", name);
-                    visitor_list.push(Visitor::new(&name, "New Friend"));
+                    visitor_list.push(Visitor::new(&name, VisitorAction::Probation, 0));
                 }
             }
         }
@@ -35,22 +35,45 @@ fn main() {
 
     println!("Thee final list of visitors is:\n{:#?}", visitor_list)
 }
+
+#[derive(Debug)]
+enum VisitorAction {
+    Accept,
+    AcceptWithNote {note: String},
+    Refuse,
+    Probation,
+}
+
 #[derive(Debug)]
 struct Visitor {
     name: String,
-    greeting: String,
+    action: VisitorAction,
+    age: i8
 }
 
 impl Visitor {
-    fn new(name: &str, greeting: &str) -> Self {
+    // function follows the constructor (struct Visitor) pattern, accepts params for the contents of the struct and returns self
+    fn new(name: &str, action: VisitorAction, age: i8) -> Self {
         Self {
             name: name.to_lowercase(),
-            greeting: greeting.to_string(),
+            action,
+            age
         }
     }
 
     fn greet_visitor(&self) {
-        println!("{}", self.greeting);
+        match &self.action {
+            VisitorAction::Accept => println!("Welcome to the treehouse, {}", self.name),
+            VisitorAction::AcceptWithNote { note } => {
+                println!("Welcome to teh treehouse, {}", self.name);
+                println!("{}", note);
+                if self.age < 21 {
+                    println!("Do not serve alcohol to {}", self.name);
+                }
+            }
+            VisitorAction::Probation => println!("{} is now a probationary member", self.name),
+            VisitorAction::Refuse => println!("Do NOT allow {} in!", self.name)
+        }
     }
 }
 
