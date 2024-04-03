@@ -1,32 +1,41 @@
 use std::io::stdin;
 
 fn main() {
-    println!("Hello, whats your name?");
-    let name = what_is_your_name();
-    println!("Hello {:?}", name);
-
-    let visitor_list = [
-        Visitor::new("bert", "Hello Bert, enjoy your treehouse."),
-        Visitor::new("steve", "Hi Steve. Your milk is in the fridge."),
-        Visitor::new("fred", "Wow, who invited Fred?"),
-    ];
-
-    // .iter () creates an iterator
-    // .find returns the result of a closure, if the result is true then the matching value is returned
-    // find returns an option type
-    let known_visitor = visitor_list.iter().find(|visitor| visitor.name == name);
-
-    // operate a match on teh variable returned from the iterator and find
-    match known_visitor {
-        // check if the option has data and make available in this clause (visitor)
-        // the => is the code to execute for this match
-        Some(visitor) => visitor.greet_visitor(),
-        // if nothing returned, execute the println! macro
-        None => println!("NOPE!  Bugger off, we dont know you!")
-    }
+    let mut visitor_list = vec![
+            Visitor::new("bert", "Hello Bert, enjoy your treehouse."),
+            Visitor::new("steve", "Hi Steve. Your milk is in the fridge."),
+            Visitor::new("fred", "Wow, who invited Fred?"),
+        ];
     
-}
+    loop {
+        println!("Hello, whats your name?");
+        let name = what_is_your_name();
 
+        // .iter () creates an iterator
+        // .find returns the result of a closure, if the result is true then the matching value is returned
+        // find returns an option type
+        let known_visitor = visitor_list.iter().find(|visitor| visitor.name == name);
+
+        // operate a match on teh variable returned from the iterator and find
+        match known_visitor {
+            // check if the option has data and make available in this clause (visitor)
+            // the => is the code to execute for this match
+            Some(visitor) => visitor.greet_visitor(),
+            // if nothing returned, execute the println! macro
+            None => {
+                if name.is_empty() {
+                    break;
+                } else {
+                    println!("{} is not on the visitor list.", name);
+                    visitor_list.push(Visitor::new(&name, "New Friend"));
+                }
+            }
+        }
+    }
+
+    println!("Thee final list of visitors is:\n{:#?}", visitor_list)
+}
+#[derive(Debug)]
 struct Visitor {
     name: String,
     greeting: String,
