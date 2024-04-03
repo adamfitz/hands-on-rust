@@ -20,11 +20,11 @@ impl GameState for State {
 
 fn main() -> BError {
     // request an 80x50 pixel terminal
-    let context = BTermBuilder::simple100x80()
+    let context = BTermBuilder::simple80x50()
         // set the window title
         .with_title("Flappy Dragon")
         // trigger the object build/creation
-        .build()?;
+        .build()?; // the ? allows errors to be passed to the parent (the main function)
     
     // start executing the game loop and link the engine with the State struct
     main_loop(context, State{})
