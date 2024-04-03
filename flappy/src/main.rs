@@ -1,6 +1,62 @@
 use bracket_lib::prelude::*;
 
-struct State {}
+// The gmae is either in the menu, playing the game or displaying the game over screen
+enum GameMode {
+    Menu,
+    Playing,
+    End
+}
+
+struct State {
+    mode: GameMode
+}
+
+impl State {
+    fn new() -> Self {
+        State {
+            mode: GameMode::Menu
+        };
+    }
+
+    fn play(&mut self, ctx: &mut Bterm){
+        //TODO: Fillin this stub later
+        self.mode = GameMode::End;
+        }
+
+    fn restart(&mut self) {
+        self.mode = GameMode::Playing;
+        }
+
+    fn main_menu(&mut self, ctx: &mut BTerm) {
+        ctx.cls();
+        ctx.print_centered(5, "Welcome to Flappy Dragon");
+        ctx.print_centered(8, "(P) Play Game");
+        ctx.print_centered(9, "(Q) Quit Game");
+        }
+
+        if let Some(key) = ctx.key {
+        match key {
+            VirtualKeyCode::P => self.restart(),
+            VirtualKeyCode::Q => ctx.quitting = true,
+            _ => {}
+            }
+        }
+
+    fn dead(&mut self, ctx: &mut BTerm) {
+        ctx.cls();
+        ctx.print_centered(5, "You are dead");
+        ctx.print_centered(8, "(P) Play again?");
+        ctx.print_centered(9, "(Q) Quit Game");
+
+        if let Some(key) = ctx.key {
+            match key {
+                VirtualKeyCode::P => self.restart(),
+                VirtualKeyCode::Q => ctx.guitting = true,
+                _ => {}
+            }
+        }
+    }
+}
 
 // implement the GameState trait (from bracket-lib) on the State struct created above
 // this is similar to implementing functions for the struct
@@ -10,11 +66,11 @@ impl GameState for State {
     // ctx provides a window to the currently running bracket-terminal to get input information from the player and for
     // sending commands to draw to the window.
     fn tick(&mut self, ctx: &mut BTerm) {
-        // ctx stands for context and provides functions to interact with the game display
-        ctx.cls(); // clears the game window (screen)
-        // allows printing of text to the game window, 1,1 are screen space coordinates
-        // print accespts a String (unlike println!)
-        ctx.print(1, 1, "Hello, Bracket Terminal!");
+        match self.mode {
+            GameMode::Menu => self.main_menu(ctx),
+            GameMode::End => self.dead(ctx),
+            GameMode::Playing => self.play(ctx)
+        }
     }
 }
 
@@ -27,7 +83,7 @@ fn main() -> BError {
         .build()?; // the ? allows errors to be passed to the parent (the main function)
     
     // start executing the game loop and link the engine with the State struct
-    main_loop(context, State{})
+    main_loop(context, State::new())
 }
 
 
