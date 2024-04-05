@@ -155,6 +155,74 @@ impl Player {
 }
 
 
+// create the obstacle object
+struct Obstacle {
+    //defines obstacle x position (horizontal)
+    x: i32,
+    // defines the center of the gap the player can ass through
+    gap_y: i32,
+    // the length of the gap in teh obstacle
+    size: i32
+}
+
+// define the implementation of the obstacle instance
+impl Obstacle {
+    // create the obstacle instance
+    fn new(x: i32, score: i32) -> Self {
+        // constructor creates new randmo number generator
+        let mut random = RandomNumberGenerator::new();
+        Obstacle {
+            x,
+            // the random number generated will be between 10-39
+            gap_y: random.range(10,40),
+            // max size will be 20 - score OR it will be 2 (gap is never below 2)
+            size: i32::max(2, 20 - score)
+        }
+    }
+    // render the obstacle instance in the screen space
+    fn render(&mut self, ctx: &mut BTerm, player_x: i32) {
+        let screen_x = self.x - player_x;
+        let half_size = self.size /2;
+
+        // draw the top half of the obstacle
+        for y in 0..self.gap_y - half_size {
+            ctx.set(
+                screen_x,
+                y,
+                RED,
+                BLACK,
+                to_cp437('/'),
+            );
+        }
+
+        // draw the bottom half of the obstacle
+        for y in self.gap_y + half_size..SCREEN_HEIGHT {
+            ctx.set(
+                screen_x,
+                y,
+                RED,
+                BLACK,
+                to_cp437('/'),
+            );
+        }
+    }
+    // crashing into walls
+    // the function receives a borroed reference to the player as input parameter, to determine playes location
+    // checks if the x coridinate for the player and the obstacle match and if so a collision occurs
+    fn hit_obstacle(&self, player: &Player) -> bool {
+        let half_size = self.size / 2;
+        // if the payers co ords match the obstacle there is a colision
+        let does_x_match = player.x == self.x;
+        // compare players y coords with the upper gap
+        let player_above_gap = player.y < self.gap_y - half_size;
+        let player_below_gap = player.y > self.gap_y + half_size;
+        // if the playes x corodinate matches the opstacle (horizontally in line with it) and the players y coords
+        // IS above OR below the gap, then the player hit the obstacle
+        does_x_match && (player_above_gap || player_below_gap)
+    }
+}
+
+
 
 fn main() -> BError {
     // request an 80x50 pixel terminal
