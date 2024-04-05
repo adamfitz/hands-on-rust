@@ -16,7 +16,9 @@ const FRAME_DURATION: f32 = 75.0;
 struct State {
     player: Player,
     frame_time: f32,
-    mode: GameMode
+    obstacle: Obstacle,
+    mode: GameMode,
+    score: i32
 }
 
 impl State {
@@ -24,7 +26,9 @@ impl State {
         State {
             player: Player::new(5,25),
             frame_time: 0.0,
+            obstacle: Obstacle::new(SCREEN_WIDTH, 0),
             mode: GameMode::Menu,
+            score: 0,
         }
     }
 
@@ -42,17 +46,34 @@ impl State {
         
         self.player.render(ctx);
         ctx.print(0, 0, "Press SPACE to flap.");
+        // display player scroe under the instructions
+        ctx.print(0, 1, &format!("Score: {}", self.score));
+
+        // render the obstacle to the screen
+        self.obstacle.render(ctx, self.player.x);
+        // when player passes the obstalce increment the score
+        if self.player.x > self.obstacle.x {
+            self.score += 1;
+            self.obstacle = Obstacle::new(
+                self.player.x + SCREEN_WIDTH, self.score
+            );
+        }
         
-        if self.player.y > SCREEN_HEIGHT {
+        if self.player.y > SCREEN_HEIGHT ||
+            self.obstacle.hit_obstacle(&self.player)
+            
+            {
             self.mode = GameMode::End;
-        }       
+            }       
         
     }
 
     fn restart(&mut self) {
         self.player = Player::new(5, 25);
         self.frame_time = 0.0;
+        self.obstacle = Obstacle::new(SCREEN_WIDTH, 0);
         self.mode = GameMode::Playing;
+        self.score = 0;
     }
 
     fn main_menu(&mut self, ctx: &mut BTerm) {
@@ -73,6 +94,7 @@ impl State {
     fn dead(&mut self, ctx: &mut BTerm) {
         ctx.cls();
         ctx.print_centered(5, "You are dead");
+        ctx.print_centered(6, &format!("Your score is: {}, points", self.score));
         ctx.print_centered(8, "(P) Play again?");
         ctx.print_centered(9, "(Q) Quit Game");
 
@@ -89,10 +111,12 @@ impl State {
 // implement the GameState trait (from bracket-lib) on the State struct created above
 // this is similar to implementing functions for the struct
 impl GameState for State {
-    // GameState requires implementation of the tick function with this signature
-    // &mut self allows tick function to access State instance and modify it
-    // ctx provides a window to the currently running bracket-terminal to get input information from the player and for
-    // sending commands to draw to the window.
+    /* 
+    GameState requires implementation of the tick function with this signature
+    &mut self allows tick function to access State instance and modify it
+    ctx provides a window to the currently running bracket-terminal to get input information from the player and for
+    sending commands to draw to the window.
+    */
     fn tick(&mut self, ctx: &mut BTerm) {
         match self.mode {
             GameMode::Menu => self.main_menu(ctx),
